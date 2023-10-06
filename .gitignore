@@ -11,3 +11,5 @@ genVisual/captions
 genVisual/saved_models
 genVisual/saved_vocabulary
 env
+env/
+.env

@@ -1,7 +1,7 @@
 
 import requests
 from PIL import Image
-from genVisual.utils import _approve, capture_image
+from utils import _approve, capture_image
 from transformers import BlipProcessor, BlipForConditionalGeneration
 from langchain import OpenAI, LLMChain, PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory

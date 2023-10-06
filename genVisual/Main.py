@@ -1,5 +1,5 @@
 import json
-from genVisual.utils import _approve, speak, wishMe
+from utils import _approve, speak, wishMe
 from langchain import OpenAI, LLMChain, PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 import os
@@ -10,8 +10,6 @@ from datetime import datetime
 from ReadKeras import process_image
 from cap import generate_image_captions
 
-
-from genVisual.newPDFProcess import document_search
 
 dotenv_path= find_dotenv()
 load_dotenv(dotenv_path)
