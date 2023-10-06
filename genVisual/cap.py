@@ -1,8 +1,8 @@
 
 import requests
 from PIL import Image
+from genVisual.utils import _approve, capture_image
 from transformers import BlipProcessor, BlipForConditionalGeneration
-from TTS import capture_image, speak
 from langchain import OpenAI, LLMChain, PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 import speech_recognition as sr
@@ -14,25 +14,6 @@ load_dotenv(dotenv_path)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 
-def _approve(_input: str) -> bool:
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        r.adjust_for_ambient_noise(source)
-        r.energy_threshold = 200
-        r.pause_threshold = 0.5
-        msg = (
-            "Do you approve of the following input? "
-            "Please say 'Yes' or 'No'."
-        )
-        msg += "\n\n" + _input + "\n"
-        speak(msg)
-        try:
-            audio = r.listen(source, timeout=50, phrase_time_limit=50)
-            resp = r.recognize_google(audio)
-            return resp.lower() in ("yes", "y")
-        except Exception as e:
-            speak(f"An error occurred while recognizing your response: {e}")
-            return False
 
 
 template = """

@@ -1,4 +1,5 @@
 import json
+from genVisual.utils import _approve, speak, wishMe
 from langchain import OpenAI, LLMChain, PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 import os
@@ -6,12 +7,7 @@ from dotenv import find_dotenv, load_dotenv
 import speech_recognition as sr
 import pyttsx3
 from datetime import datetime
-
-from TTS import SetLanguage, speak,wishMe
-
-from _approve import _approve
-
-from genVisual.ReadKeras import process_image
+from ReadKeras import process_image
 from cap import generate_image_captions
 
 
@@ -79,7 +75,7 @@ def get_names():
                 user_name = r.recognize_google(audio)
                 speak(f"I'm Tom. Nice to meet you, {user_name}.")
 
-                SetLanguage()
+                # SetLanguage()
                 
                 help_content = """
                         Here are some available commands:

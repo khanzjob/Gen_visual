@@ -1,7 +1,7 @@
-import speech_recognition as sr
-    
-    
+
 import os
+from re import search
+import re
 import time
 import requests
 from datetime import datetime
@@ -53,9 +53,7 @@ def count_tokens(text):
 
 
 def speak(text):
-    
-
-    if current_language.lower == "english":
+    # if current_language.lower == "english":
         voice_id = Vid
         api_key = elevenLabsAPI
         CHUNK_SIZE = 1024
@@ -123,16 +121,16 @@ def speak(text):
         except Exception as err:
             print(f"An error occurred: {err}")
    
-    elif current_language.lower == "luganda":
-        translate_text_to_luganda(text)
-    elif current_language.lower == "acholi":
-        translate_text_to_acholi(text)
-    elif current_language.lower == "ateso":
-        translate_text_to_ateso(text)
-    elif current_language.lower == "lugbara":
-        translate_text_to_lugbara(text)
-    elif current_language.lower == "runyankole":
-        translate_text_to_Runyankole(text)
+    # elif current_language.lower == "luganda":
+    #     translate_text_to_luganda(text)
+    # elif current_language.lower == "acholi":
+    #     translate_text_to_acholi(text)
+    # elif current_language.lower == "ateso":
+    #     translate_text_to_ateso(text)
+    # elif current_language.lower == "lugbara":
+    #     translate_text_to_lugbara(text)
+    # elif current_language.lower == "runyankole":
+    #     translate_text_to_Runyankole(text)
         
 def wishMe():
     hour = int(datetime.now().hour)
@@ -197,32 +195,349 @@ def speech_to_text():
         return ""
     
 # Luganda function
-def SetLanguage():
-    r = sr.Recognizer()
+# def SetLanguage():
+#     r = sr.Recognizer()
 
-    with sr.Microphone() as source:
+#     with sr.Microphone() as source:
         
-        r.adjust_for_ambient_noise(source, duration=5)
-        r.energy_threshold = 200
-        r.pause_threshold = 4
+#         r.adjust_for_ambient_noise(source, duration=5)
+#         r.energy_threshold = 200
+#         r.pause_threshold = 4
 
-        while True:
-            text = ""
-            speak("Choose your prefered language from the list below: English, Acholi, Ateso, Luganda, Lugbara and Runyankole")
-            try:
-                audio = r.listen(source, timeout=90, phrase_time_limit=90)  # Updated to 90 seconds
-                speak("Recognizing...")
-                text = r.recognize_google(audio)
+#         while True:
+#             text = ""
+#             speak("Choose your prefered language from the list below: English, Acholi, Ateso, Luganda, Lugbara and Runyankole")
+#             try:
+#                 audio = r.listen(source, timeout=90, phrase_time_limit=90)  # Updated to 90 seconds
+#                 speak("Recognizing...")
+#                 text = r.recognize_google(audio)
 
-                approval = _approve(text)
+#                 approval = _approve(text)
+#                 if approval:
+#                     LanguageSetting.set_language(text)
+#                 else:
+#                     continue
+#                 speak("language selected :", text)
+#                 return text
+#             except sr.UnknownValueError:
+#                 print("Google Speech Recognition could not understand the audio")
+#             except sr.RequestError as e:
+#                 print("Could not request results from Google Speech Recognition service; {0}".format(e))
+
+#  ###########################
+def load_env_vars():
+    try:
+        dotenv_path = find_dotenv()
+        load_dotenv(dotenv_path)
+        OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+        os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+    except Exception as err:
+        speak(f"Couldn't load environment variables. Error: {err}")
+        pass
+
+def load_processed_files_list():
+    try:
+        if os.path.exists('processed_files.txt'):
+            with open('processed_files.txt', 'r') as f:
+                return f.read().splitlines()
+        else:
+            return []
+    except Exception as err:
+        speak(f"Couldn't load processed files list. Error: {err}")
+        pass
+
+def save_processed_file(file):
+    try:
+        with open('processed_files.txt', 'a') as f:
+            f.write(f"{file}\n")
+    except Exception as err:
+        speak(f"Couldn't save processed file. Error: {err}")
+        pass
+
+def load_docs(directory):
+    try:
+        loader = DirectoryLoader(directory)
+        documents = loader.load()
+        processed_files = load_processed_files_list()
+        new_documents = [doc for doc in documents if doc.filename not in processed_files]
+        return new_documents
+    except Exception as err:
+        speak(f"Couldn't load documents. Error: {err}")
+        pass
+
+def setup_directory(directory):
+    try:
+        today = datetime.today().strftime('%Y-%m-%d')
+        directory = os.path.join(directory, today)
+        os.makedirs(directory, exist_ok=True)
+    except Exception as err:
+        speak(f"Couldn't create directory. Error: {err}")
+        pass
+
+# def delete_non_pdf_files(directory):
+#     for filename in os.listdir(directory):
+#         if not filename.endswith('.pdf'):
+#             os.remove(os.path.join(directory, filename))
+#             speak(f"Deleted {filename}")
+#         else:
+#             speak(f"Skipped {filename}")
+
+def delete_non_doc_files(directory):
+    valid_extensions = ['.pdf', '.docx', '.doc', '.txt']
+    for filename in os.listdir(directory):
+        file_ext = os.path.splitext(filename)[1].lower()
+        if file_ext not in valid_extensions:
+            os.remove(os.path.join(directory, filename))
+            speak(f"Deleted {filename}")
+        else:
+            speak(f"Skipped {filename}")
+
+
+def split_docs(documents, chunk_size=1000, chunk_overlap=20):
+    try:
+        speak("organizing content for output.")
+        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        docs = text_splitter.split_documents(documents)
+        return docs
+    except Exception as err:
+        speak(f"Couldn't split documents. Error: {err}")
+        pass
+
+def setup_embeddings(docs):
+    try:
+
+        embeddings = OpenAIEmbeddings(model="ada")
+        pinecone.init(api_key="ad1d0ede-9c36-4444-9924-58c1cbe34d5e", environment="us-east1-gcp")
+        index_name = "gptdocs"
+        index = Pinecone.from_documents(docs, embeddings, index_name=index_name)
+        speak("Content almost ready")
+        return index
+    except Exception as err:
+        speak(f"Couldn't initialize embeddings or Pinecone. Error: {err}")
+        pass
+
+def get_similiar_docs(index, query, k=2, score=False):
+    try:
+        if score:
+            similar_docs = index.similarity_search_with_score(query, k=k)
+        else:
+            similar_docs = index.similarity_search(query, k=k)
+        return similar_docs
+    except Exception as err:
+        speak(f"Couldn't retrieve similar documents. Error: {err}")
+        pass
+
+def setup_chat_model():
+    try:
+        chat_model = ChatOpenAI(model="gpt-3.5-turbo")
+        return chat_model
+    except Exception as err:
+        speak(f"Couldn't setup chat model. Error: {err}")
+        pass
+
+def load_qa_chain(chat_model):
+    try:
+        qa_chain = load_qa_chain(chat_model)
+        return qa_chain
+    except Exception as err:
+        speak(f"Couldn't load question answering chain. Error: {err}")
+        pass
+
+def get_answer(qa_chain, query, similar_docs):
+    try:
+        message = {"role": "user", "content": query}
+        for doc in similar_docs:
+            message["document"] = doc.content
+        answer = qa_chain.get_answer(message)
+        return answer
+    except Exception as err:
+        speak(f"Couldn't generate answer. Error: {err}")
+        pass
+
+
+
+def document_search():
+    # download_pdf_files(max_results=5)
+    download_files(max_results=10)
+
+    speak("files downloded, initialising preprocessing to meaningfull content. please be patient. This  may take some time depending on the number of documents being used.")
+
+    # load_env_vars()
+    directory = '/pdfs'
+    setup_directory(directory)
+    delete_non_doc_files(directory)
+
+    new_documents = load_docs(directory)
+    for doc in new_documents:
+        save_processed_file(doc.filename)
+    split_documents = split_docs(new_documents)
+    index = setup_embeddings(split_documents)
+    chat_model = setup_chat_model()
+    qa_chain = load_qa_chain(chat_model)
+
+    # Uncomment the lines below if you want to test the full process
+    query = get_user_query()
+    similar_docs = get_similiar_docs(index, query)
+    answer = get_answer(qa_chain, query, similar_docs)
+    speak(answer)
+
+
+
+
+def sanitize_and_get_user_query():
+    r = sr.Recognizer()
+    query = ""
+    try:
+        with sr.Microphone() as source:
+            r.adjust_for_ambient_noise(source)
+            r.energy_threshold = 200
+            r.pause_threshold = 3
+            
+            while True:
+                speak("Note: u  only have one minute for me to capture input. What would you like to research about?. ")
+                audio = r.listen(source, timeout=60, phrase_time_limit=60)
+                query = r.recognize_google(audio)
+                
+                approval = _approve(query)  # Add the approval check
+                
                 if approval:
-                    LanguageSetting.set_language(text)
+                    break
                 else:
+                    speak("Sorry, the query you provided is not approved. Please try again.")
+    except sr.WaitTimeoutError:
+        print("Timeout error: the speech recognition operation timed out")
+    except sr.UnknownValueError:
+        speak("Sorry, I could not understand your query. Please try again.")
+    except sr.RequestError as e:
+        speak(f"Could not request results from the speech recognition service; check your internet connection: {e}")
+    except Exception as e:
+        speak(f"An error occurred: {e}")
+    
+    return re.sub(r'(?u)[^-\w.]', '', query)
+
+
+def download_files(max_results=4, base_directory='./pdfs'):
+    keyword = sanitize_and_get_user_query()
+
+    today = datetime.today().strftime('%Y-%m-%d')
+    directory = os.path.join(base_directory, today)
+    os.makedirs(directory, exist_ok=True)
+
+    extensions = ['.pdf', '.docx', '.doc', '.txt']
+    speak("Initializing downloads from the internet. This may take some time depending on your internet speed. Please wait for the response.")
+    for url in search(keyword, num_results=max_results):
+        try:
+            response = requests.get(url, timeout=15)
+        except requests.exceptions.RequestException as err:
+            print(f"Couldn't download file {url}. Error: {err}")
+            continue
+
+        file_ext = os.path.splitext(url)[1].lower()
+        if file_ext in extensions:
+            filename = os.path.basename(url)
+            if not os.path.isfile(os.path.join(directory, filename)):
+                try:
+                    with open(os.path.join(directory, filename), 'wb') as f:
+                        f.write(response.content)
+                    speak(f"Downloaded {filename}")
+                except Exception as err:
+                    print(f"Couldn't write file {filename}. Error: {err}")
                     continue
-                speak("language selected :", text)
-                return text
-            except sr.UnknownValueError:
-                print("Google Speech Recognition could not understand the audio")
-            except sr.RequestError as e:
-                print("Could not request results from Google Speech Recognition service; {0}".format(e))
+        else:
+            speak(f"Skipped {url}")
+
+    speak("Downloaded files successfully")
+
+
+
+
+def sanitize(filename):
+    return re.sub(r'(?u)[^-\w.]', '', filename)
+
+def count_files(directory):
+    files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+    return len(files)
+
+
+def get_user_query(lg):
+    r = sr.Recognizer()
+    query = ""
+    try:
+        with sr.Microphone() as source:
+            r.adjust_for_ambient_noise(source)
+            r.energy_threshold = 200
+            r.pause_threshold = 3
+            
+            while True:
+                
+                speak("Note: u  only have one minute for me to capture input. What would you like to research about?. ")
+                audio = r.listen(source, timeout=60, phrase_time_limit=60)
+                query = r.recognize_google(audio)
+                # speak(f"Your query is: {query}")
+                
+                approval = _approve(query)  # Add the approval check
+                
+                if approval:
+                    break
+                else:
+                    speak("Sorry, the query you provided is not approved. Please try again.")
+    except sr.WaitTimeoutError:
+        print("Timeout error: the speech recognition operation timed out")
+    except sr.UnknownValueError:
+        speak("Sorry, I could not understand your query. Please try again.")
+    except sr.RequestError as e:
+        speak(f"Could not request results from the speech recognition service; check your internet connection: {e}")
+    except Exception as e:
+        speak(f"An error occurred: {e}")
+    
+    return query
+
+def _download_pdf_filest( max_results=10, base_directory='./pdfs'):
+
+    keyword = get_user_query()
+    # Generate directory name for today's date
+    today = datetime.today().strftime('%Y-%m-%d')
+    directory = os.path.join(base_directory, today)
+    
+    # Create the directory to save the pdf files if it does not exist
+    os.makedirs(directory, exist_ok=True)
+
+    query = keyword + " filetype:pdf"
+
+    # List to store the names of downloaded files
+    downloaded_files = []
+
+    # Search the web with the keyword
+    speak("iNITIALIZING DOWNLOADS")
+    for url in search(query, num_results=max_results):
+        try:
+            
+            response = requests.get(url, timeout=10)
+        except requests.exceptions.RequestException as err:
+            print(f"Couldn't download file {url}. Error: {err}")
+            continue
+
+        # Check if the response content type is pdf
+        if response.headers['content-type'] == 'application/pdf':
+            # Extract the pdf file name from the url and sanitize it
+            filename = sanitize(os.path.basename(url))
+            
+            # Check if the file already exists
+            if not os.path.isfile(os.path.join(directory, filename)):
+                try:
+                    # Download and save the pdf file
+                    with open(os.path.join(directory, filename), 'wb') as f:
+                        f.write(response.content)
+                    downloaded_files.append(filename)  # Add the file name to the list
+                    speak("DOWNLOADED {filename}")
+                except Exception as err:
+                    print(f"Couldn't write file {filename}. Error: {err}")
+                    continue
+
+    # After downloading all files, print the count and the names
+    # speak(f"Downloaded {len(downloaded_files)} files:")
+    # speak(f"Downloaded filesnames include :")
+    speak(f"Downloaded files successfully")
+
+
 
