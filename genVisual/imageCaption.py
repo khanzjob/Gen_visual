@@ -1,5 +1,5 @@
 
-from TTS import speak,capture_image
+from .utils import speak
 from model import get_caption_model, generate_caption
 import os
 def CaptionImage(image_path):

@@ -4,10 +4,11 @@ import os
 import re
 import requests
 from datetime import datetime
+from .utils import speak
 from googlesearch import search
 import speech_recognition as sr
 
-from TTS import speak
+
 from _approve import _approve
 
 

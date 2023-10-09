@@ -6,9 +6,14 @@ import time
 import requests
 from datetime import datetime
 import pygame
+
+
 import cv2
 import speech_recognition as sr  # required to return a string output by taking microphone input from the user
 from dotenv import find_dotenv ,load_dotenv
+from langchain import OpenAI, LLMChain, PromptTemplate
+# from langchain.document_loaders import DirectoryLoader
+
 # from languageSetting import LanguageSetting
 
 # from sampleSunbird import text_to_speech_lg, translate_text_to_Runyankole, translate_text_to_acholi, 
@@ -41,11 +46,11 @@ def _approve(_input: str) -> bool:
 
 dotenv_path= find_dotenv()
 load_dotenv(dotenv_path)
+voice_id = "AZnzlk1XvdvUeBnXmlld"
 Vid = os.getenv("voice_id")
 elevenLabsAPI = os.getenv("elevenLabsAPI")
 
-current_language = LanguageSetting.get_language()
-
+# 
 def count_tokens(text):
     tokens = text.split()
     NoOfTokens = len(tokens)
@@ -256,11 +261,12 @@ def save_processed_file(file):
 
 def load_docs(directory):
     try:
-        loader = DirectoryLoader(directory)
-        documents = loader.load()
-        processed_files = load_processed_files_list()
-        new_documents = [doc for doc in documents if doc.filename not in processed_files]
-        return new_documents
+        # loader = DirectoryLoader(directory)
+        # documents = loader.load()
+        # processed_files = load_processed_files_list()
+        # new_documents = [doc for doc in documents if doc.filename not in processed_files]
+        # return new_documents
+        pass
     except Exception as err:
         speak(f"Couldn't load documents. Error: {err}")
         pass
@@ -295,10 +301,11 @@ def delete_non_doc_files(directory):
 
 def split_docs(documents, chunk_size=1000, chunk_overlap=20):
     try:
-        speak("organizing content for output.")
-        text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
-        docs = text_splitter.split_documents(documents)
-        return docs
+        # speak("organizing content for output.")
+        # text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        # docs = text_splitter.split_documents(documents)
+        # return docs
+        pass
     except Exception as err:
         speak(f"Couldn't split documents. Error: {err}")
         pass
@@ -306,12 +313,13 @@ def split_docs(documents, chunk_size=1000, chunk_overlap=20):
 def setup_embeddings(docs):
     try:
 
-        embeddings = OpenAIEmbeddings(model="ada")
-        pinecone.init(api_key="ad1d0ede-9c36-4444-9924-58c1cbe34d5e", environment="us-east1-gcp")
-        index_name = "gptdocs"
-        index = Pinecone.from_documents(docs, embeddings, index_name=index_name)
-        speak("Content almost ready")
-        return index
+        # embeddings = OpenAIEmbeddings(model="ada")
+        # pinecone.init(api_key="ad1d0ede-9c36-4444-9924-58c1cbe34d5e", environment="us-east1-gcp")
+        # index_name = "gptdocs"
+        # index = Pinecone.from_documents(docs, embeddings, index_name=index_name)
+        # speak("Content almost ready")
+        # return index
+        pass
     except Exception as err:
         speak(f"Couldn't initialize embeddings or Pinecone. Error: {err}")
         pass

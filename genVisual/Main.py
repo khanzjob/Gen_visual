@@ -1,7 +1,7 @@
 import json
-from utils import _approve, speak, wishMe
+from utils import _approve, document_search, speak, wishMe
 from langchain import OpenAI, LLMChain, PromptTemplate
-from langchain.memory import ConversationBufferWindowMemory
+# from langchain.memory import ConversationBufferWindowMemory
 import os
 from dotenv import find_dotenv, load_dotenv
 import speech_recognition as sr
@@ -107,7 +107,7 @@ chatgpt_chain = LLMChain(
     llm=OpenAI(temperature=0),
     prompt=prompt,
     verbose=True,
-    memory=ConversationBufferWindowMemory(k=2),
+    # memory=ConversationBufferWindowMemory(k=2),
 )
 
 engine = pyttsx3.init()

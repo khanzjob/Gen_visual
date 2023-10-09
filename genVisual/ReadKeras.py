@@ -3,10 +3,11 @@ import os
 import sys
 import io
 import easyocr
+from utils import capture_image, speak
+
 from dotenv import find_dotenv, load_dotenv
-from TTS import capture_image, speak
 from langchain import OpenAI, LLMChain, PromptTemplate
-from langchain.memory import ConversationBufferWindowMemory
+# from langchain.memory import ConversationBufferWindowMemory
 import speech_recognition as sr
 
 dotenv_path= find_dotenv()
@@ -63,7 +64,7 @@ chatgpt_chain = LLMChain(
     llm=OpenAI(temperature=0),
     prompt=prompt,
     verbose=True,
-    memory=ConversationBufferWindowMemory(k=2),
+    # memory=ConversationBufferWindowMemory(k=2),
 )
 
 def process_image():
