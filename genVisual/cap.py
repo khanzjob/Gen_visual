@@ -42,7 +42,7 @@ def local_image_to_pil(path):
 
 
 def generate_image_captions():
-    local_model_dir = 'C:\Users\DELL\Desktop\Marvin\Gen_visual\genVisual\captions'
+    local_model_dir = 'C:\\Users\DELL\\Desktop\\Marvin\\Gen_visual\\genVisual\\captions'
 
     try:
         processor = BlipProcessor.from_pretrained(local_model_dir)

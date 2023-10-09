@@ -46,7 +46,7 @@ def _approve(_input: str) -> bool:
 
 dotenv_path= find_dotenv()
 load_dotenv(dotenv_path)
-voice_id = "AZnzlk1XvdvUeBnXmlld"
+voice_id = "2EiwWnXFnvU5JabPnv8n"
 Vid = os.getenv("voice_id")
 elevenLabsAPI = os.getenv("elevenLabsAPI")
 
@@ -95,34 +95,32 @@ def speak(text):
             return
 
         try:
+
             directory = datetime.now().strftime('%Y-%m-%d')
             os.makedirs(directory, exist_ok=True)
-            
-            # Delete all files in the directory
-            try:
-                file_list = os.listdir(directory)
-                for file_name in file_list:
-                    file_path = os.path.join(directory, file_name)
-                    if os.path.isfile(file_path):
-                        time.sleep(0.1)
-                        os.remove(file_path)
-            except Exception as err:
-                print(f"An error occurred while deleting files: {err}")
-            
+
             file_path = os.path.join(directory, output_file)
-            
+
             with open(file_path, 'wb') as f:
                 for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
                     if chunk:
                         f.write(chunk)
-        
+
             # Play the audio file with pygame
             pygame.mixer.init()
             pygame.mixer.music.load(file_path)
             pygame.mixer.music.play()
             while pygame.mixer.music.get_busy():
                 continue
-        
+
+            pygame.mixer.quit()  # Release the audio file after playing
+
+            # Delete the audio file after it's been played
+            try:
+                os.remove(file_path)
+            except Exception as err:
+                print(f"An error occurred while deleting the file: {err}")
+
         except Exception as err:
             print(f"An error occurred: {err}")
    

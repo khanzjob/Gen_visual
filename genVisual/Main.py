@@ -10,7 +10,6 @@ from datetime import datetime
 from ReadKeras import process_image
 from cap import generate_image_captions
 
-
 dotenv_path= find_dotenv()
 load_dotenv(dotenv_path)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -58,7 +57,7 @@ def save_conversation(user_input, bot_response):
 def get_names():
     r = sr.Recognizer()
     user_name = get_user_name()
-    bot_name = "Tom"
+    bot_name = "Clyde"
     try:
         with sr.Microphone() as source:
             r.adjust_for_ambient_noise(source)
@@ -68,7 +67,7 @@ def get_names():
             if user_name:
                 speak(f"Welcome back, {user_name}!")
             else:
-                speak("Hi there. i would like to know you better. What's your name?")
+                speak("Hi there. i would like to know you. What's your name?")
                 audio = r.listen(source, timeout=30, phrase_time_limit=30) # Updated to 90 seconds
                 user_name = r.recognize_google(audio)
                 speak(f"I'm Tom. Nice to meet you, {user_name}.")
@@ -109,9 +108,7 @@ chatgpt_chain = LLMChain(
     verbose=True,
     # memory=ConversationBufferWindowMemory(k=2),
 )
-
 engine = pyttsx3.init()
-
 def listen():
     r = sr.Recognizer()
     wishMe()
@@ -131,7 +128,7 @@ def listen():
                 speak("Listening for new input. now...")
                 try:
                     audio = r.listen(source, timeout=90, phrase_time_limit=90) # Updated to 90 seconds
-                    speak("Recognizing...")
+                    speak("one moment please ...")
                     text = r.recognize_google(audio)
                     # Add conditionals for triggering your functions based on the recognized text
                     keyword_found = False
