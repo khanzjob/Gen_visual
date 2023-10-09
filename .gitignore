@@ -13,3 +13,4 @@ genVisual/saved_vocabulary
 env
 env/
 .env
+_pycache/

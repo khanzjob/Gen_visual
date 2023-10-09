@@ -7,17 +7,10 @@ import requests
 from datetime import datetime
 import pygame
 
-
 import cv2
 import speech_recognition as sr  # required to return a string output by taking microphone input from the user
 from dotenv import find_dotenv ,load_dotenv
 from langchain import OpenAI, LLMChain, PromptTemplate
-# from langchain.document_loaders import DirectoryLoader
-
-# from languageSetting import LanguageSetting
-
-# from sampleSunbird import text_to_speech_lg, translate_text_to_Runyankole, translate_text_to_acholi, 
-# translate_text_to_ateso, translate_text_to_luganda, translate_text_to_lugbara
 
 def _approve(_input: str) -> bool:
     r = sr.Recognizer()
@@ -46,16 +39,14 @@ def _approve(_input: str) -> bool:
 
 dotenv_path= find_dotenv()
 load_dotenv(dotenv_path)
-voice_id = "2EiwWnXFnvU5JabPnv8n"
+voice_id = "pNInz6obpgDQGcFmaJgB"
 Vid = os.getenv("voice_id")
 elevenLabsAPI = os.getenv("elevenLabsAPI")
 
-# 
 def count_tokens(text):
     tokens = text.split()
     NoOfTokens = len(tokens)
     return NoOfTokens
-
 
 def speak(text):
     # if current_language.lower == "english":

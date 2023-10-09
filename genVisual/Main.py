@@ -79,8 +79,8 @@ def get_names():
                         - Search: Perform a PDF search basing on input
                         - Caption Image: Generate captions for an image
                         - Read: Perform image reading, recognising text from image and and making sense out of it. 
-                        - send message : use whatsap for messenging
-                        - translate : feature to translate specch to sign language and signlanguage to speech            
+                        - send message : use Discord for messenging
+                        - translate : feature to translate speech to sign language and signlanguage to speech , or text to local language           
                         - Help: Display available commands
                         """
                 speak(f"Kindly consider the folowing. {help_content}")
