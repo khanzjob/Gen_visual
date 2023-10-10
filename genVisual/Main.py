@@ -1,7 +1,15 @@
 import json
+import sys
+# sys.path.append('C:/Users/DELL/Desktop/Marvin/Gen_visual/Calls_Messaging')
+sys.path.append('C:/Users/DELL/Desktop/Marvin/Gen_visual/genVisual')
+sys.path.append('C:/Users/DELL/Desktop/Marvin/Gen_visual/Calls_Messaging')
+import discordBot
+# import processDoc
+import subjectCrud
+
 from utils import _approve, document_search, speak, wishMe
 from langchain import OpenAI, LLMChain, PromptTemplate
-# from langchain.memory import ConversationBufferWindowMemory
+from langchain.memory import ConversationBufferWindowMemory
 import os
 from dotenv import find_dotenv, load_dotenv
 import speech_recognition as sr
@@ -76,6 +84,7 @@ def get_names():
                 
                 help_content = """
                         Here are some available commands:
+                        - Subjects - Manage Subjects (Science For Now)
                         - Search: Perform a PDF search basing on input
                         - Caption Image: Generate captions for an image
                         - Read: Perform image reading, recognising text from image and and making sense out of it. 
@@ -106,9 +115,10 @@ chatgpt_chain = LLMChain(
     llm=OpenAI(temperature=0),
     prompt=prompt,
     verbose=True,
-    # memory=ConversationBufferWindowMemory(k=2),
+    memory=ConversationBufferWindowMemory(k=2),
 )
 engine = pyttsx3.init()
+
 def listen():
     r = sr.Recognizer()
     wishMe()
@@ -134,7 +144,7 @@ def listen():
                     keyword_found = False
 
                     if 'search' in text.lower():
-                        document_search()
+                        # document_search()
                         keyword_found = True
                     elif 'caption image' in text.lower():
                         speak("image caption function selected")
@@ -145,20 +155,26 @@ def listen():
                         process_image()
                         keyword_found = True
                     elif 'send message' in text.lower():
-                        # function goes here
+                        discordBot.SendMessage()
                         keyword_found = True
                     elif 'translate' in text.lower():
                             #translate function goes here
+                            keyword_found = True
+                    elif 'Subjects' in text.lower():
+                            #translate function goes here
+                            subject_manager = subjectCrud.SubjectManager()
+                            subject_manager.process_voice_commands()
                             keyword_found = True
 
                     elif 'help' in text.lower():
                         help_content = """
                         Here are some available commands:
+                        - Subjects - Manage Subjects (Science For Now)
                         - Search: Perform a PDF search basing on input
                         - Caption Image: Generate captions for an image
                         - Read: Perform image reading, recognising text from image and and making sense out of it. 
-                        - send message : use whatsap for messenging
-                        - translate : feature to translate specch to sign language and signlanguage to speech            
+                        - send message : use Discord for messenging
+                        - translate : feature to translate speech to sign language and signlanguage to speech , or text to local language           
                         - Help: Display available commands
                         """
                         speak("Sure!.")
@@ -199,6 +215,7 @@ def listen():
         print(f"An error occurred: {e}")
 
 if __name__ == "__main__":
+    # processDoc.document_search()
     listen()
 
 

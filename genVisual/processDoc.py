@@ -1,6 +1,4 @@
 
-
-
 import os
 from dotenv import find_dotenv, load_dotenv
 from langchain.document_loaders import DirectoryLoader
@@ -11,12 +9,10 @@ import pinecone
 from langchain.vectorstores import Pinecone
 from langchain.chat_models import ChatOpenAI
 from langchain.chains.question_answering import load_qa_chain
-from langchain.vectorstores import Chroma
-from langchain.chains import RetrievaQA
-from langchain.llms import OpenAI
+
 from datetime import datetime
 
-from TTS import speak
+
 
 try:
     dotenv_path = find_dotenv()
@@ -24,11 +20,11 @@ try:
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 except Exception as err:
-    speak(f"Couldn't load environment variables. Error: {err}")
+    print(f"Couldn't load environment variables. Error: {err}")
     exit()
 
 def load_processed_files_list():
-    speak("Loading files for preprocessing")
+    print("Loading files for preprocessing")
     
     try:
         if os.path.exists('processed_files.txt'):
@@ -37,7 +33,7 @@ def load_processed_files_list():
         else:
             return []
     except Exception as err:
-        speak(f"Couldn't load processed files list. Error: {err}")
+        print(f"Couldn't load processed files list. Error: {err}")
         exit()
 
 def save_processed_file(file):
@@ -45,11 +41,11 @@ def save_processed_file(file):
         with open('processed_files.txt', 'a') as f:
             f.write(f"{file}\n")
     except Exception as err:
-        speak(f"Couldn't save processed file. Error: {err}")
+        print(f"Couldn't save processed file. Error: {err}")
         exit()
 
 def load_docs(directory):
-    speak("Loading file directory for preprocessing")
+    print("Loading file directory for preprocessing")
     try:
         loader = DirectoryLoader(directory)
         documents = loader.load()
@@ -59,34 +55,34 @@ def load_docs(directory):
       
         return new_documents
     except Exception as err:
-        speak(f"Couldn't load documents. Error: {err}")
+        print(f"Couldn't load documents. Error: {err}")
         exit()
 
 try:
-    directory = 'C:/Users/jukas/Desktop/LangChain/pdfs/'
+    directory = 'C:/Users/DELL/Desktop/Marvin/Gen_visual/documentProcessing'
     today = datetime.today().strftime('%Y-%m-%d')
     directory = os.path.join(directory, today)
     os.makedirs(directory, exist_ok=True)
 except Exception as err:
-    speak(f"Couldn't create directory. Error: {err}")
+    print(f"Couldn't create directory. Error: {err}")
     exit()
 
 def delete_non_pdf_files(directory):
-    speak("cleaning files for preprocessing")
+    print("cleaning files for preprocessing")
     for filename in os.listdir(directory):
         if not filename.endswith('.pdf'):
             os.remove(os.path.join(directory, filename))
             print(f"Deleted {filename}")
         else:
-            speak(f"Skipped {filename}")
+            print(f"Skipped {filename}")
 
 try:
     delete_non_pdf_files(directory)
-    speak("files cleaned successfully to pdf only.")
+    print("files cleaned successfully to pdf only.")
     documents = load_docs(directory)
-    speak("pdfs loaded successfully")
+    print("pdfs loaded successfully")
 except Exception as err:
-    speak(f"Couldn't delete non-pdf files or load documents. Error: {err}")
+    print(f"Couldn't delete non-pdf files or load documents. Error: {err}")
     exit()
 
 def split_docs(documents,chunk_size=1000,chunk_overlap=20):
@@ -95,7 +91,7 @@ def split_docs(documents,chunk_size=1000,chunk_overlap=20):
         docs = text_splitter.split_documents(documents)
         return docs
     except Exception as err:
-        speak(f"Couldn't split documents. Error: {err}")
+        print(f"Couldn't split documents. Error: {err}")
         exit()
 
 try:

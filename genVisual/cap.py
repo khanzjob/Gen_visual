@@ -4,7 +4,7 @@ from PIL import Image
 from utils import _approve, capture_image, speak
 from transformers import BlipProcessor, BlipForConditionalGeneration
 from langchain import OpenAI, LLMChain, PromptTemplate
-# from langchain.memory import ConversationBufferWindowMemory
+from langchain.memory import ConversationBufferWindowMemory
 import speech_recognition as sr
 import os
 from dotenv import find_dotenv, load_dotenv
@@ -32,7 +32,7 @@ chatgpt_chain = LLMChain(
     llm=OpenAI(temperature=0),
     prompt=prompt,
     verbose=True,
-    # memory=ConversationBufferWindowMemory(k=2),
+    memory=ConversationBufferWindowMemory(k=2),
 )
 
 

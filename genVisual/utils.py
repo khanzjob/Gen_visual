@@ -6,11 +6,11 @@ import time
 import requests
 from datetime import datetime
 import pygame
-
+from langchain.chat_models import ChatOpenAI
 import cv2
 import speech_recognition as sr  # required to return a string output by taking microphone input from the user
 from dotenv import find_dotenv ,load_dotenv
-from langchain import OpenAI, LLMChain, PromptTemplate
+
 
 def _approve(_input: str) -> bool:
     r = sr.Recognizer()
