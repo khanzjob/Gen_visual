@@ -1,5 +1,7 @@
 {
     "python.analysis.extraPaths": [
-        "./Calls_Messaging"
+        "./Calls_Messaging",
+        "./documentProcessing",
+        "./genVisual"
     ]
 }

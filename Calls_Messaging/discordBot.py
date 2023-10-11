@@ -85,10 +85,10 @@ def speak(text):
             response = requests.post(url, json=data, headers=headers)
             response.raise_for_status()
         except requests.exceptions.HTTPError as err:
-            print(f"HTTP error occurred: {err}")
+            speak(f"HTTP error occurred: {err}")
             return
         except Exception as err:
-            print(f"An error occurred: {err}")
+            speak(f"An error occurred: {err}")
             return
 
         try:
@@ -152,8 +152,16 @@ def get_user_input():
         r.energy_threshold = 200
         r.pause_threshold = 4
         audio = r.listen(source, timeout=30, phrase_time_limit=30)
-        user_input = r.recognize_google(audio)
-    return user_input
+        try:
+            user_input = r.recognize_google(audio)
+            return user_input
+        except sr.UnknownValueError:
+            speak("Sorry, I did not catch that. Please speak again.")
+            return get_user_input()  # recursively prompt the user to speak again
+        except sr.RequestError:
+            # API was unreachable or unresponsive
+            speak("API unavailable. Please try again later.")
+            return None
 
 @bot.event
 async def on_ready():
@@ -184,78 +192,7 @@ async def on_ready():
             speak(f"New message from {msg.author.name} in {msg.channel.name}: {msg.content}")
 
     speak(f'We have logged in as {bot.user}')
-# @bot.event
-# async def on_message(message):
-#     global last_message
 
-#     if message.author == bot.user:
-#         return
-
-#     author_id = message.author.id
-#     author_name = message.author.name
-
-#     if message.type == discord.MessageType.default:
-#         message_content = message.content
-
-#         if not message_content and message.embeds:
-#             message_content = "Embed content detected."
-#         elif not message_content and message.attachments:
-#             message_content = "Attachment detected."
-
-#         display_message = f"\nReceived message  from {author_name} . Message is .  : {message_content}"
-        
-#         if isinstance(message.channel, discord.DMChannel):
-#             display_message = f"\nReceived DM from {author_name} (ID: {author_id}): {message_content}"
-        
-#         speak(display_message)
-#         send_notification(f"Message from {author_name}", message_content)
-
-#         last_message = message
-#         message_data = {
-#             "author_id": author_id,
-#             "author_name": author_name,
-#             "content": message_content,
-#             "channel": message.channel.name if isinstance(message.channel, discord.TextChannel) else "DM",
-#             "message_id": message.id   # Add this line
-
-#         }
-#         message_history.append(message_data)
-#         save_message_history('message_history.json', message_history)
-
-#     await bot.process_commands(message)
-# def voice_input_thread(loop, bot):
-#     global last_message
-#     while True:
-#         speak("\n Speak to Send message")
-#         reply = get_user_input()
-        
-#         if not _approve(reply):
-#             speak("input withdrawn..")
-#             continue
-
-#         if reply.lower() == "exit":
-#             loop.create_task(graceful_shutdown(bot, loop))
-#             return
-
-#         if last_message:
-#             asyncio.run_coroutine_threadsafe(last_message.channel.send(reply), loop)
-# def SendMessage():
-#     # Load messages from history file
-#     loaded_messages = load_message_history('message_history.json')
-#     message_history.extend(loaded_messages)
-
-#     # Set up asyncio event loop
-#     loop = asyncio.get_event_loop()
-
-#     # Start voice input thread for user to send replies using voice commands
-#     t = threading.Thread(target=voice_input_thread, args=(loop, bot))
-#     t.start()
-
-#     # Start bot on the main thread
-#     loop.run_until_complete(bot.start(TOKEN))
-
-# # if __name__ == "__main__":
-# #     SendMessage()
 @bot.event
 async def on_message(message):
     global last_message
@@ -333,5 +270,5 @@ def SendMessage():
     # Start bot on the main thread
     loop.run_until_complete(bot.start(TOKEN))
 
-if __name__ == "__main__":
-    SendMessage()
+# if __name__ == "__main__":
+#     SendMessage()

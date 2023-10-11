@@ -104,4 +104,3 @@ def process_image():
                 break
 
 
-

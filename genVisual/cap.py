@@ -9,12 +9,13 @@ import speech_recognition as sr
 import os
 from dotenv import find_dotenv, load_dotenv
 
+API_URL = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large"
+headers = {"Authorization": "Bearer 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"}
+
 dotenv_path= find_dotenv()
 load_dotenv(dotenv_path)
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
-
-
+os.environ["OPENAI_API_KEY"] = "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"
 
 template = """
 Interpreting the Image Caption:
@@ -26,54 +27,47 @@ Please contribute your insights, interpretations, or clarifications to help unra
 Let's embark on this meaningful journey together, embracing the opportunities presented by image captioning and the power of ChatGPT!
 
 """
-
 prompt = PromptTemplate(input_variables=["caption"], template=template)
 chatgpt_chain = LLMChain(
     llm=OpenAI(temperature=0),
     prompt=prompt,
     verbose=True,
     memory=ConversationBufferWindowMemory(k=2),
-)
+) 
 
-
-def local_image_to_pil(path):
-    img = Image.open(path).convert('RGB')
-    return img
 
 
 def generate_image_captions():
-    local_model_dir = 'C:\\Users\DELL\\Desktop\\Marvin\\Gen_visual\\genVisual\\captions'
+    # local_model_dir = 'C:\\Users\DELL\\Desktop\\Marvin\\Gen_visual\\genVisual\\captions'
 
     try:
-        processor = BlipProcessor.from_pretrained(local_model_dir)
-        model = BlipForConditionalGeneration.from_pretrained(local_model_dir)
-
+       
         img_path = capture_image()
-        img_url = local_image_to_pil(img_path)
-        raw_image = img_url
-
-        text = "a photography of"
-        inputs = processor(raw_image, text, return_tensors="pt")
-
-        out = model.generate(**inputs)
-        caption = processor.decode(out[0], skip_special_tokens=True)
-        print(caption)
-
-        speak("Caption generated: " + caption)
+        
+        caption = query(img_path)
+        generated_text = caption[0]['generated_text']
+        speak("Caption generated: " + generated_text)
 
         if _approve("Do you want to retake the image?"):
             generate_image_captions()
         else:
-            interpretation = chatgpt_chain.predict(caption=caption)
+            interpretation = chatgpt_chain.predict(caption=generated_text)
             speak("Interpretation:")
             speak(interpretation)
 
     except Exception as e:
         speak("An error occurred: " + str(e))
+        print(("An error occurred: " + str(e)))
         if _approve("Do you want to retake the image?"):
             generate_image_captions()
         else:
             speak("Caption generation failed.")
+def query(filename):
+    with open(filename, "rb") as f:
+        data = f.read()
+    response = requests.post(API_URL, headers=headers, data=data)
+    return response.json()
 
+# generate_image_captions() 
 
 

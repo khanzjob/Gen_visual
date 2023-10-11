@@ -37,7 +37,7 @@ Here is your conversation history:
 
 TOM: {human_input}
 USER:"""
-
+ 
 def save_user_name(user_name):
     with open("user_name.txt", "w") as file:
         file.write(user_name)
@@ -123,14 +123,12 @@ def listen():
     r = sr.Recognizer()
     wishMe()
     get_names()
-
     try:
-
         with sr.Microphone() as source:
             speak("Initializing microphone for use...")
             r.adjust_for_ambient_noise(source, duration=5)
             r.energy_threshold = 200
-            r.pause_threshold = 4
+            r.pause_threshold = 3
 
             speak("Okay, let's get started!. One sec please")
             while True:
@@ -154,17 +152,18 @@ def listen():
                         speak("read function selected")
                         process_image()
                         keyword_found = True
-                    elif 'send message' in text.lower():
-                        discordBot.SendMessage()
-                        keyword_found = True
+                    
                     elif 'translate' in text.lower():
                             #translate function goes here
                             keyword_found = True
-                    elif 'Subjects' in text.lower():
+                    elif 'subject' in text.lower():
                             #translate function goes here
                             subject_manager = subjectCrud.SubjectManager()
                             subject_manager.process_voice_commands()
                             keyword_found = True
+                    elif 'send message' in text.lower():
+                        discordBot.SendMessage()
+                        keyword_found = True
 
                     elif 'help' in text.lower():
                         help_content = """
@@ -181,10 +180,11 @@ def listen():
                         speak(help_content)
                         keyword_found = True
 
-                    if not keyword_found:
-                        approval = _approve(text)
-                        if not approval:
-                            continue
+                    else:
+                        if not keyword_found:
+                            approval = _approve(text)
+                            if not approval:
+                                continue
 
                 except sr.WaitTimeoutError:
                     print("Timeout error: the speech recognition operation timed out")

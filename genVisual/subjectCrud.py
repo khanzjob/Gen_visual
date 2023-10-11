@@ -1,10 +1,14 @@
 import os
 import speech_recognition as sr
 import sys
+# import documentProcessing
 # sys.path.append('C:/Users/DELL/Desktop/Marvin/Gen_visual/Calls_Messaging')
 sys.path.append('C:/Users/DELL/Desktop/Marvin/Gen_visual/genVisual')
+sys.path.append('C:/Users/DELL/Desktop/Marvin/Gen_visual/documentProcessing')
+import QADocumentBot
 # import discordBot
 import utils
+
 def get_user_input():
     r = sr.Recognizer()
     with sr.Microphone() as source:
@@ -63,45 +67,73 @@ class SubjectManager:
             utils.speak(response)
 
     def process_voice_commands(self):
-        utils.speak("Welcome to the Voice Command Subject Manager!,You can say 'list subjects', 'add', or 'remove' followed by the subject name.")
+        help_content = """
+                        Here are some available commands:
+                        - manage subjects: manages the available subjects
+                        - science: Selects Science subject. 
+            """
+        subjects = self.list_subjects()
+        utils.speak(f" Welcome to the Voice Command Subject Manager!. Here are the available subjects: {', '.join(subjects)}  {help_content}")
+    
+
+        command = get_user_input()
         
-        while True:
-            utils.speak("Ready and....go.")
-            command = get_user_input()
+        if 'science' in command:
             
-            if command is None:
-                utils.speak("No input detected. Exiting...")
-                break
+            utils.speak(QADocumentBot.user_prefrence())
 
-            command = command.lower()
+        elif 'manage subjects' in command:
+            availabe_commands = """
+                    You can use the following commands:
+                    - add: to add a subject
+                    - remove: to remove an already existing subject
+                    - list subjects: to list all the subjects
+                    - exit: to exit the converstion
+                    
+                    """
+            utils.speak(availabe_commands)
+            while True :
+                
+                utils.speak("Ready and....go.")
 
-            if 'exit' in command:
-                utils.speak("Well thank you.... Exiting...")
-                break
-            
-            if 'list subjects' in command:
-                subjects = self.list_subjects()
-                utils.speak(f"Here are the available subjects: {', '.join(subjects)}")
-            
-            elif 'add' in command:
-                subject_name = command.replace('add', '').strip()
-                if utils._approve(f"Add the subject: {subject_name}?"):
-                    result = self.add_subject(subject_name)
-                    utils.speak(result)
+                command = get_user_input()
+                
+                if command is None:
+                    utils.speak("No input detected. Exiting...")
+                    break
+
+                command = command.lower()
+
+                if 'exit' in command:
+                    utils.speak("Well thank you.... Exiting...")
+                    break
+                
+                if 'list subjects' in command:
+                    subjects = self.list_subjects()
+                    utils.speak(f"Here are the available subjects: {', '.join(subjects)}")
+                
+                elif 'add' in command:
+                    subject_name = command.replace('add', '').strip()
+                    if utils._approve(f"Add the subject: {subject_name}?"):
+                        result = self.add_subject(subject_name)
+                        utils.speak(result)
+                    else:
+                        utils.speak("Subject addition cancelled.")
+                
+                elif 'remove' in command:
+                    subject_name = command.replace('remove', '').strip()
+                    if utils._approve(f"Remove the subject: {subject_name}?"):
+                        result = self.remove_subject(subject_name)
+                        utils.speak(result)
+                    else:
+                        utils.speak("Subject removal cancelled.")
+                
                 else:
-                    utils.speak("Subject addition cancelled.")
-            
-            elif 'remove' in command:
-                subject_name = command.replace('remove', '').strip()
-                if utils._approve(f"Remove the subject: {subject_name}?"):
-                    result = self.remove_subject(subject_name)
-                    utils.speak(result)
-                else:
-                    utils.speak("Subject removal cancelled.")
-            
-            else:
-                utils.speak("Sorry, I didn't recognize that command. Please try again.")
-            utils.speak("What would you like to do next?")
+                    utils.speak("Sorry, I didn't recognize that command. Please try again.")
+                utils.speak("What would you like to do next?")
+        else:
+            utils.speak("Sorry, I did not catch that. lets try again.")
+            self.process_voice_commands()
 
 # Instantiate and test
 # subject_manager = SubjectManager()

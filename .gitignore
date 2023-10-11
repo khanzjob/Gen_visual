@@ -14,3 +14,4 @@ env
 env/
 .env
 _pycache/
+vector_db/
