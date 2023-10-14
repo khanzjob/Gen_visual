@@ -270,5 +270,5 @@ def SendMessage():
     # Start bot on the main thread
     loop.run_until_complete(bot.start(TOKEN))
 
-# if __name__ == "__main__":
-#     SendMessage()
+if __name__ == "__main__":
+    SendMessage()
