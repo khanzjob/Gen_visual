@@ -15,3 +15,5 @@ env/
 .env
 _pycache/
 vector_db/
+.credentials
+Calls_Messaging/credentials.json
