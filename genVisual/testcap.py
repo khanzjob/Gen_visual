@@ -22,3 +22,8 @@ def get_image_captions(*image_urls):
 path = capture_image()
 captions = get_image_captions(*path)
 print(captions)
+
+
+my_list = [1, 2, 3, 4, 5]
+del my_list[0:2]
+print(my_list)

@@ -102,5 +102,5 @@ def process_image():
                 continue
             else:
                 break
-
-
+            
+process_image()
